@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { getReservation, getTruck } from "../api";
 import { actionType, reservationStatus, truckStatus } from "../constants";
 import { useStateValue } from "../StateProvider";
 import "./KakaoMap.css";
@@ -63,6 +64,32 @@ const KakaoMap = () => {
     if (sock) {
       console.log("sock effect");
       sock.on("updateReservationStatus", function (data) {
+        const op = data.operationType;
+        switch (op) {
+          case "insert":
+            dispatch({
+              type: actionType.INSERT_RESERVATION,
+              payload: data.fullDocument,
+            });
+            break;
+          case "update":
+            dispatch({
+              type: actionType.UPDATE_RESERVATION,
+              payload: {
+                documentKey: data.documentKey._id,
+                updateFields: data.updateDescription.updatedFields,
+              },
+            });
+            break;
+          case "delete":
+            dispatch({
+              type: actionType.REMOVE_RESERVATIONR,
+              payload: data.documentKey._id,
+            });
+            break;
+          default:
+            break;
+        }
         console.log("updateReservationStatus", data);
       });
 
@@ -196,14 +223,16 @@ const KakaoMap = () => {
   }
 
   function makeClickListener(map, marker, infowindow, item, type) {
+    item.infoWindow = infowindow;
     return function () {
       if (type === "truck") {
         dispatch({ type: actionType.SELECT_TRUCK, payload: item });
+        dispatch({ type: actionType.SELECT_TAB, payload: 1 });
         infowindow.open(map, marker);
       } else {
         dispatch({ type: actionType.SELECT_RESERVATION, payload: item });
+        dispatch({ type: actionType.SELECT_TAB, payload: 0 });
       }
-      
     };
   }
 
@@ -234,6 +263,20 @@ const KakaoMap = () => {
         dispatch({ type: actionType.SET_MAP, payload: map });
 
         refMapLoaded.current = true;
+
+        getTruck().then((trucks) => {
+          dispatch({
+            type: actionType.SET_TRUCKS,
+            payload: trucks,
+          });
+        });
+
+        getReservation().then((reservations) => {
+          dispatch({
+            type: actionType.SET_RESERVATIONS,
+            payload: reservations,
+          });
+        });
 
         return map;
       });

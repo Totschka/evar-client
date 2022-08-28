@@ -12,6 +12,7 @@ export const actionType = {
   SELECT_COORDINATE: 10,
   SELECT_TRUCK: 11,
   SELECT_RESERVATION: 12,
+  SELECT_TAB: 13,
 };
 
 export const truckStatus = {

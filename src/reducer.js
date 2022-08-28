@@ -12,6 +12,7 @@ export const initialState = {
   selectedCoordinates: [0, 0],
   selectedTruck: null,
   selectedReservation: null,
+  selectedTab: 0,
 };
 
 const reducer = (state, action) => {
@@ -23,13 +24,13 @@ const reducer = (state, action) => {
     case actionType.SET_TRUCKS:
       return { ...state, trucks: action.payload };
     case actionType.INSERT_TRUCK:
-      console.log("insert");
       return { ...state, trucks: [...state.trucks, action.payload] };
     case actionType.UPDATE_TRUCK:
       const id = action.payload.documentKey;
       const updateFields = action.payload.updateFields;
       const newTrucks = state.trucks.map((t) => {
         if (t._id === id) {
+          t.infoWindow.close();
           if (updateFields["location.coordinates.0"] || updateFields["location.coordinates.1"]) {
             updateFields.location = t.location;
             let newCoordinates = t.location.coordinates;
@@ -61,16 +62,39 @@ const reducer = (state, action) => {
     case actionType.SET_RESERVATIONS:
       return { ...state, reservations: action.payload };
     case actionType.INSERT_RESERVATION:
-      return { ...state, reservations: action.payload };
+      return { ...state, reservations: [...state.trucks, action.payload] };
     case actionType.UPDATE_RESERVATION:
-      return { ...state, reservations: action.payload };
+      const reserveId = action.payload.documentKey;
+      const updateReserveFields = action.payload.updateFields;
+      const newReservations = state.reservations.map((t) => {
+        if (t._id === reserveId) {
+          t.infoWindow.close();
+          if (updateReserveFields["location.coordinates.0"] || updateReserveFields["location.coordinates.1"]) {
+            updateReserveFields.location = t.location;
+            let newCoordinates = t.location.coordinates;
+            if (updateReserveFields["location.coordinates.0"]) {
+              newCoordinates[0] = updateReserveFields["location.coordinates.0"];
+              delete updateReserveFields["location.coordinates.0"];
+            }
+            if (updateReserveFields["location.coordinates.1"]) {
+              newCoordinates[1] = updateReserveFields["location.coordinates.1"];
+              delete updateReserveFields["location.coordinates.1"];
+            }
+          }
+          t = { ...t, ...updateReserveFields };
+        }
+
+        return t;
+      });
+      return { ...state, reservations: newReservations };
     case actionType.SELECT_COORDINATE:
       return { ...state, selectedCoordinates: action.payload };
     case actionType.SELECT_TRUCK:
       return { ...state, selectedTruck: action.payload };
     case actionType.SELECT_RESERVATION:
       return { ...state, selectedReservation: action.payload };
-
+    case actionType.SELECT_TAB:
+      return { ...state, selectedTab: action.payload };
     default:
       return state;
   }
