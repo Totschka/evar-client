@@ -1,4 +1,5 @@
 import axios from "axios";
+import moment from "moment";
 import { config } from "./config";
 
 export function getTruck(car_number) {
@@ -56,10 +57,13 @@ export function getReservation(reservation_id) {
 }
 
 export function postReservation(email, lng, lat, date, chargeAmount) {
+  const utcDate = moment(date).utc().format("YYYY.MM.DD HH:mm");
+  console.log(utcDate);
+
   const url = config.api.reservation;
   const data = {
     user_id: email,
-    reservation_date: date,
+    reservation_date: utcDate,
     charge_amount: chargeAmount,
     location: { type: "Point", coordinates: [lng, lat] },
   };
@@ -70,6 +74,9 @@ export function postReservation(email, lng, lat, date, chargeAmount) {
 }
 
 export function patchReservation(reservation_id, reservation_status, lng, lat, date, chargeAmount, car_number) {
+  const utcDate = moment(date).utc().format("YYYY.MM.DD HH:mm");
+  console.log(utcDate);
+
   const url = config.api.reservation + (reservation_id || "");
   const data = {
     reservation_id,

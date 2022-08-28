@@ -1,4 +1,5 @@
 import { TextField, Button, InputLabel, Select, MenuItem, FormGroup, FormLabel, Divider, RadioGroup, Radio, FormControlLabel, FormControl } from "@mui/material";
+import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
 import { getTruckNear, patchReservation, postReservation } from "../api";
 import { actionType, reservationStatus, truckStatus } from "../constants";
@@ -35,8 +36,11 @@ function Reservation() {
       setReservationId(selectedReservation.reservation_id);
       setEmail(selectedReservation.user_id);
       const gmt = new Date(selectedReservation.reservation_date);
-      const month = gmt.getMonth() + 1;
-      setDate(`${gmt.getFullYear()}.${month < 10 ? "0" + month : month}.${gmt.getDate()} ${gmt.getHours()}:${gmt.getMinutes() < 10 ? "0" + gmt.getMinutes() : gmt.getMinutes()}`);
+      const date = moment(gmt).local().format("YYYY-MM-DD HH:mm");
+      // const month = gmt.getMonth() + 1;
+      // const date = gmt.getDate();
+      setDate(date);
+      //setDate(`${gmt.getFullYear()}.${month < 10 ? "0" + month : month}.${date < 10 ? "0" + date : date} ${gmt.getHours()}:${gmt.getMinutes() < 10 ? "0" + gmt.getMinutes() : gmt.getMinutes()}`);
       setChargeAmount(selectedReservation.charge_amount);
       setReservationStatus(selectedReservation.reservation_status);
 
@@ -141,17 +145,28 @@ function Reservation() {
             </MenuItem>
           </Select>
         </FormControl>
-        <TextField fullWidth margin="normal" label="Date" placeholder="yyyy.MM.dd HH:mm" value={date} onChange={handleDateChange} />
+        <TextField
+          fullWidth
+          margin="normal"
+          type="datetime-local"
+          label="Date"
+          InputLabelProps={{
+            shrink: true,
+          }}
+          placeholder="yyyy.MM.dd HH:mm"
+          value={date}
+          onChange={handleDateChange}
+        />
         <TextField fullWidth margin="normal" label="ChargeAmount" value={chargeAmount} onChange={handleChargeAmountChange} inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }} />
         <TextField fullWidth margin="normal" label="Lng" value={selectedCoordinates[0]} onChange={handleLngChange} />
         <TextField fullWidth margin="normal" label="Lat" value={selectedCoordinates[1]} onChange={handleLatChange} />
         <FormControl margin="normal">
           <InputLabel>AllocateTruck</InputLabel>
-          <Select label="AllocateTruck" value={allocateTruck} onChange={handleAllocateTruckChange}>
+          <Select label="AllocateTruck" value={allocateTruck} onChange={handleAllocateTruckChange} disabled={rsvStatus > reservationStatus.READY ? false : true}>
             <MenuItem key={0} value={""}>
               없음
             </MenuItem>
-            {selectedReservation ? (
+            {selectedReservation?.allocate_truck ? (
               <MenuItem key={selectedReservation.allocate_truck} value={selectedReservation.allocate_truck}>
                 {selectedReservation.allocate_truck}
               </MenuItem>
