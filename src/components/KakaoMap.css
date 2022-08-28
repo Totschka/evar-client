@@ -1,0 +1,12 @@
+.map {
+  width: 100%;
+  height: 100%;
+}
+
+.infoWindow table th {
+  font-size: 14px;
+}
+
+.infoWindow table td {
+  font-size: 14px;
+}

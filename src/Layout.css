@@ -1,0 +1,17 @@
+.container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+}
+
+.left {
+  width: 75vw;
+}
+
+.right {
+  width: 25vw;
+  overflow-y: auto;
+}
+
+@media screen {
+}
